@@ -1,6 +1,7 @@
 // src/App.js
 import React, { useEffect, useState } from "react";
 import { login, getAccessToken } from "./spotifyAuth";
+import { APIController } from "./apiController"; // Importa o controlador
 
 function App() {
   const [token, setToken] = useState(null);
@@ -11,38 +12,30 @@ function App() {
 
   useEffect(() => {
     async function initApp() {
+      // Pega o token de acesso da URL
       const t = await getAccessToken();
       if (t) {
         setToken(t);
 
-        // pega top 5 músicas
+        // --- Busca os dados usando o APIController ---
+
+        // Pega top 5 músicas
         setLoadingTracks(true);
-        const tracksRes = await fetch(
-          "https://api.spotify.com/v1/me/top/tracks?limit=5",
-          {
-            headers: { Authorization: "Bearer " + t },
-          }
-        );
-        const tracksData = await tracksRes.json();
-        setTopTracks(tracksData.items || []);
+        const tracksData = await APIController.getTopTracks(t);
+        setTopTracks(tracksData);
         setLoadingTracks(false);
 
-        // pega playlists do usuário
+        // Pega playlists do usuário
         setLoadingPlaylists(true);
-        const playlistsRes = await fetch(
-          "https://api.spotify.com/v1/me/playlists?limit=10",
-          {
-            headers: { Authorization: "Bearer " + t },
-          }
-        );
-        const playlistsData = await playlistsRes.json();
-        setPlaylists(playlistsData.items || []);
+        const playlistsData = await APIController.getUserPlaylists(t);
+        setPlaylists(playlistsData);
         setLoadingPlaylists(false);
       }
     }
     initApp();
   }, []);
 
+  // Se não houver token, mostra o botão de login
   if (!token) {
     return (
       <div className="p-4">
@@ -54,6 +47,7 @@ function App() {
     );
   }
 
+  // Se houver token, mostra os dados do usuário
   return (
     <div className="p-4">
       <h1>🎵 Spotify Academic App</h1>
@@ -67,7 +61,7 @@ function App() {
           <p>Não encontramos músicas.</p>
         ) : (
           <ul style={{ listStyle: "none", padding: 0 }}>
-            {topTracks.slice(0, 5).map((track, index) => (
+            {topTracks.map((track, index) => (
               <li
                 key={track.id}
                 style={{

@@ -1,13 +1,17 @@
 // src/spotifyAuth.js
 const clientId = "c2eea5622deb457a855f83d50216e5be";
 const redirectUri = "http://127.0.0.1:3000/callback";
-const scopes = ["user-top-read", "playlist-read-private", "playlist-read-collaborative"
+const scopes = [
+  "user-top-read",
+  "playlist-read-private",
+  "playlist-read-collaborative",
 ];
 
 // gera código aleatório para PKCE
 function generateRandomString(length) {
   let text = "";
-  let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let possible =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   for (let i = 0; i < length; i++) {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }

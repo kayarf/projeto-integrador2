@@ -21,6 +21,21 @@ export const APIController = (() => {
     }
   };
 
+  const _getUserPlaylists = async (token) => {
+    try {
+      const result = await fetch(`${apiBaseUrl}/me/playlists`, {
+        method: "GET",
+        headers: { Authorization: "Bearer " + token },
+      });
+      if (!result.ok) return [];
+      const data = await result.json();
+      return data.items || [];
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
+  };
+
   const _getGenres = async (token) => {
     try {
       const result = await fetch(`${apiBaseUrl}/browse/categories?locale=sv_US`, {
@@ -83,10 +98,12 @@ export const APIController = (() => {
   };
 
   return {
-    getTopTracks: _getTopTracks, // Exporta a nova função
+    getTopTracks: _getTopTracks,
+    getUserPlaylists: _getUserPlaylists, // <-- Adicione esta linha
     getGenres: _getGenres,
     getPlaylistByGenre: _getPlaylistByGenre,
     getTracks: _getTracks,
     getTrack: _getTrack,
   };
+
 })();

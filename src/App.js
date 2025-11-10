@@ -1,7 +1,7 @@
-// src/App.js
 import React, { useEffect, useState } from "react";
 import { login, getAccessToken } from "./spotifyAuth";
-import { APIController } from "./apiController"; // Importa o controlador
+import { APIController } from "./apiController";
+import "./App.css";
 
 function App() {
   const [token, setToken] = useState(null);
@@ -12,20 +12,15 @@ function App() {
 
   useEffect(() => {
     async function initApp() {
-      // Pega o token de acesso da URL
       const t = await getAccessToken();
       if (t) {
         setToken(t);
 
-        // --- Busca os dados usando o APIController ---
-
-        // Pega top 5 músicas
         setLoadingTracks(true);
         const tracksData = await APIController.getTopTracks(t);
         setTopTracks(tracksData);
         setLoadingTracks(false);
 
-        // Pega playlists do usuário
         setLoadingPlaylists(true);
         const playlistsData = await APIController.getUserPlaylists(t);
         setPlaylists(playlistsData);
@@ -35,77 +30,62 @@ function App() {
     initApp();
   }, []);
 
-  // Se não houver token, mostra o botão de login
+  // ================= TELA DE LOGIN =================
   if (!token) {
     return (
-      <div className="p-4">
+      <div className="login-screen">
         <h1>🎵 Spotify Academic App</h1>
-        <button onClick={login} className="btn btn-success">
+        <p>Explore suas músicas e playlists favoritas com estilo 🔥</p>
+        <button onClick={login} className="login-button">
           Login com Spotify
         </button>
+        <footer>© {new Date().getFullYear()} Projeto Acadêmico</footer>
       </div>
     );
   }
 
-  // Se houver token, mostra os dados do usuário
+  // ================= APP PRINCIPAL =================
   return (
-    <div className="p-4">
+    <div className="app-container">
       <h1>🎵 Spotify Academic App</h1>
 
-      {/* ====================== MÚSICAS MAIS OUVIDAS ====================== */}
-      <section style={{ marginBottom: "40px" }}>
-        <h2>Minhas 5 músicas mais ouvidas</h2>
+      {/* ====================== COLAGENS DE ÁLBUNS ====================== */}
+      <section className="album-collage-section">
+        <h2>🎧 Colagem 2x2 - Álbuns mais escutados</h2>
         {loadingTracks ? (
-          <p>Carregando músicas...</p>
-        ) : topTracks.length === 0 ? (
-          <p>Não encontramos músicas.</p>
+          <p>Carregando álbuns...</p>
         ) : (
-          <ul style={{ listStyle: "none", padding: 0 }}>
-            {topTracks.map((track, index) => (
-              <li
+          <div className="collage-grid grid-2x2">
+            {topTracks.slice(0, 4).map((track) => (
+              <img
                 key={track.id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  marginBottom: "15px",
-                  gap: "15px",
-                }}
-              >
-                <span style={{ fontSize: "18px", fontWeight: "bold" }}>
-                  #{index + 1}
-                </span>
-                <img
-                  src={
-                    track.album?.images?.[0]?.url ||
-                    "https://via.placeholder.com/60"
-                  }
-                  alt={track.name}
-                  style={{ width: "60px", borderRadius: "8px" }}
-                />
-                <div>
-                  <h4 style={{ margin: 0 }}>{track.name}</h4>
-                  <p style={{ margin: 0, color: "gray" }}>
-                    {track.artists.map((artist) => artist.name).join(", ")}
-                  </p>
-                </div>
-                <a
-                  href={track.external_urls.spotify}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    marginLeft: "auto",
-                    padding: "6px 12px",
-                    backgroundColor: "#1DB954",
-                    color: "white",
-                    borderRadius: "20px",
-                    textDecoration: "none",
-                  }}
-                >
-                  Ouvir
-                </a>
-              </li>
+                src={track.album?.images?.[0]?.url}
+                alt={track.name}
+                className="collage-img"
+              />
             ))}
-          </ul>
+          </div>
+        )}
+      </section>
+
+      <section className="album-collage-section">
+        <h2>🎵 Colagem 3x3 - Mais tocadas recentemente</h2>
+        {loadingTracks ? (
+          <p>Carregando álbuns...</p>
+        ) : (
+          <div className="collage-grid grid-3x3">
+            {topTracks
+              .concat(topTracks) // duplica pra garantir 9 imagens se tiver só 5 topTracks
+              .slice(0, 9)
+              .map((track, index) => (
+                <img
+                  key={`${track.id}-${index}`}
+                  src={track.album?.images?.[0]?.url}
+                  alt={track.name}
+                  className="collage-img"
+                />
+              ))}
+          </div>
         )}
       </section>
 
